@@ -13,7 +13,7 @@ Tile-matching game (inspired by Bejeweled)
 Javascript, HTML, CSS, Canvas
 
 # Wireframe
-![wireframe](assets/BeSparkly Wireframe.png)
+![wireframe](assets/BeSparkly_Wireframe.png)
 
 # Backend
 * At least 6 types of jewels to match
