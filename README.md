@@ -22,9 +22,9 @@ Javascript, HTML, CSS, Canvas
 * Bonus objects
 
 # Implementation Timeline
-Day 1:
-Day 2:
-Day 3:
+* Day 1: Score, board grid
+* Day 2: Pieces
+* Day 3: Front end styling
 
 # Bonus
 Zen mode - no score, looping animation mimicking slow breathing pattern
