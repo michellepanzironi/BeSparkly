@@ -1,0 +1,74 @@
+div {
+  text-align: center;
+  font-family: Helvetica;
+  color: white;
+}
+
+.whole-page {
+  justify-content: space-around;
+  min-height: 100vh;
+  background-image: url('https://img00.deviantart.net/30e9/i/2010/347/0/f/bejeweled_3_wallpaper__1_by_zombifier25-d34smgr.jpg');
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 48px;
+  font-weight: lighter;
+  letter-spacing: 5px;
+  padding: 10px;
+  text-shadow: -2px 3px 0 purple;
+  /* text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px purple, 0 0 30px purple, 0 0 40px purple, 0 0 50px purple, 0 0 75px purple; */
+}
+
+.game-board-container {
+  margin: 10px auto;
+  width: 500px;
+}
+
+.top-bar {
+  height: 25px;
+  display: flex;
+  justify-content: space-between;
+  background-color: purple;
+}
+
+.score {
+  padding: 5px;
+}
+
+.level {
+  padding: 5px;
+}
+
+.grid-container {
+  background-color: grey;
+  height: 500px;
+  width: 500px;
+}
+
+.progress-bar {
+  background-color: purple;
+}
+
+.by-me {
+  margin: 15px 0;
+  font-size: 18px;
+}
+
+.bottom-links {
+  justify-content: space-around;
+  display: flex;
+  font-size: 48px;
+}
+
+.bottom-links a {
+  padding: 10px;
+  text-decoration: none;
+}
+
+.side {
+  justify-content: space-around;
+}
