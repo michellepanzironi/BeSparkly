@@ -143,6 +143,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Game; });
 /* harmony import */ var _grid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./grid */ "./lib/grid.js");
 /* harmony import */ var _jewel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jewel */ "./lib/jewel.js");
+/* harmony import */ var _timer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./timer */ "./lib/timer.js");
+
 
 
 
@@ -156,30 +158,39 @@ class Game {
     this.modalContent.innerHTML = `Level ${this.level}`;
     this.grid = new _grid__WEBPACK_IMPORTED_MODULE_0__["default"](this, this.level);
     this.newLevel = newLevel();
+    this.timer = new _timer__WEBPACK_IMPORTED_MODULE_3__["default"]();
   }
-}
+  newLevel() {
+    this.level.innerHTML = `Level ${this.level}`;
+  }
 
-  const newLevel = () => {
-    undefined.level.innerHTML = `Level ${undefined.level}`;
-  };
+  incrementLevel() {
+    this.levelOver(3000);
+    this.level += 1;
+    this.modalContent.innerHTML = `Level ${this.level}`;
+  }
 
-  const incrementLevel = () => {
-    undefined.levelOver(3000);
-    undefined.level += 1;
-    undefined.modalContent.innerHTML = `Level ${undefined.level}`;
-  };
-
-  const levelOver = delay => {
-    undefined.grid.clear();
+  levelOver(delay) {
+    this.grid.clear();
     setTimeout(() => {
-      undefined.nextLevel();
+      this.nextLevel();
     }, delay);
-  };
+  }
 
-  const gameOver = () => {
-    undefined.levelOver(3000);
-    undefined.modalContent.innerHTML = `Game over :( <br /> Play again?`;
-    };
+  gameOver() {
+    this.levelOver(3000);
+    this.modalContent.innerHTML = `Game over :( <br /> Play again?`;
+  }
+
+  // pause() {
+  //   this.timer.stop();
+  //   this.modal.style.display = 'block';
+  // }
+  //
+  // play() {
+  //
+  // }
+}
 
 
 /***/ }),
@@ -536,6 +547,44 @@ class Progress {
       this.bar.classList.remove('updating');
       this.bar.classList.remove('active');
     }, 600);
+  }
+}
+
+
+/***/ }),
+
+/***/ "./lib/timer.js":
+/*!**********************!*\
+  !*** ./lib/timer.js ***!
+  \**********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Timer; });
+class Timer {
+  constructor() {
+    this.clock = document.getElementById('timer');
+  }
+
+  reset(time) {
+    this.startTime = new Date().getTime();
+    this.time = time;
+  }
+
+  start() {
+    this.startTime = new Date().getTime();
+    this.paused = false;
+  }
+
+  stop() {
+    this.time = this.remaining();
+    this.paused = true;
+  }
+
+  remaining() {
+    return this.time - (new Date.getTime() - this.startTime);
   }
 }
 
