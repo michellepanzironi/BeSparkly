@@ -8,23 +8,19 @@
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/board.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:900" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
     <meta name="robots" content="noindex,nofollow">
   </head>
   <body>
     <div class="whole-page">
-      <div class="title">
-
-        BESPARKLY
-        </div>
+      <div class="title">BESPARKLY</div>
       <div class="game-board-container">
-        <div class="top-bar">
+        <div class="progress-bar">
           <div class="score">SCORE</div>
           <div class="level">LEVEL</div>
         </div>
         <div class="grid-container">
-          <ul>
-            <!-- grid -->
-          </ul>
+          <canvas id="game" width="480" height="480"></canvas>
         </div>
         <div class="progress-bar">[PROGRESS]</div>
         <div class="by-me">A clone of Bejeweled by Michelle Panzironi</div>
@@ -33,6 +29,9 @@
           <a href="https://linkedin.com/in/michellepanzironi"><i class="fab fa-linkedin-in"></i></a>
           <a href="https://michellepanzironi.com"><i class="fas fa-briefcase"></i></a>
         </div>
+      </div>
+      <div class="sidebar">
+        <div class="new-game"></div>
       </div>
     </div>
   </body>
