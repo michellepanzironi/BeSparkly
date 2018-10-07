@@ -143,7 +143,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Game; });
 /* harmony import */ var _grid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./grid */ "./lib/grid.js");
 /* harmony import */ var _jewel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jewel */ "./lib/jewel.js");
-/* harmony import */ var _timer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./timer */ "./lib/timer.js");
+/* harmony import */ var _timer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./timer */ "./lib/timer.js");
 
 
 
@@ -153,12 +153,12 @@ class Game {
     this.board = document.getElementById('board');
     this.levelBar = document.getElementById('level-bar');
     this.modal = document.getElementById('modal');
-    this.modalContent = document.getElementById('modalContent');
+    this.modalContent = document.getElementById('modal-content');
     this.level = 1;
     this.modalContent.innerHTML = `Level ${this.level}`;
     this.grid = new _grid__WEBPACK_IMPORTED_MODULE_0__["default"](this, this.level);
     this.newLevel = newLevel();
-    this.timer = new _timer__WEBPACK_IMPORTED_MODULE_3__["default"]();
+    this.timer = new _timer__WEBPACK_IMPORTED_MODULE_2__["default"]();
   }
   newLevel() {
     this.level.innerHTML = `Level ${this.level}`;
@@ -171,7 +171,7 @@ class Game {
   }
 
   levelOver(delay) {
-    this.grid.clear();
+    this.grid.clearGrid();
     setTimeout(() => {
       this.nextLevel();
     }, delay);
@@ -182,14 +182,18 @@ class Game {
     this.modalContent.innerHTML = `Game over :( <br /> Play again?`;
   }
 
-  // pause() {
-  //   this.timer.stop();
-  //   this.modal.style.display = 'block';
-  // }
-  //
-  // play() {
-  //
-  // }
+  pause() {
+    this.timer.stop();
+    this.modal.style.display = 'block';
+  }
+
+  play() {
+    if (this.grid.frozen) return;
+    this.modal.style.display = 'none';
+    this.modalContent.innerHTML = `Level ${this.level - 4}`;
+    this.grid.start();
+    this.time.start();
+  }
 }
 
 
@@ -218,6 +222,7 @@ class Grid {
   constructor(game, level) {
     this.game = game;
     game.board.addEventListener('mousedown', this.handleSelect.bind(this));
+    this.progress = new _progress__WEBPACK_IMPORTED_MODULE_2__["default"]();
   }
 
   reset() {
@@ -279,28 +284,49 @@ class Grid {
     jewel.select();
   }
 
-  reject() {
-
-  }
-
-  remove(row) {
-
-  }
-
   merge(jewels) {
-
+    return jewels.filter((jewel, idx) => jewels.indexOf(jewel) === idx);
   }
 
-  getRow() {
-
+  getRow(jewel, otherJewel) {
+    const start = this.getEnd([jewel, otherJewel]);
+    const end = this.getEnd([jewel, otherJewel]).slice(2);
+    end.reverse();
+    return start.concat(end);
   }
 
   getAllRows(jewel) {
-
+    let result = false;
+    let pairs = [];
+    let removeThese = [];
+    jewel.pos.allNearbyJewels().forEach(pos => {
+      if (this.getJewel(pos).matches(jewel) && !pairs.some(matched => {
+        matched.sameRowAs(pos);
+      })) {
+        pairs.push(pos);
+      }
+    });
+    pairs.forEach(pos => {
+      const row = this.getRow(jewel, this.getJewel(pos));
+      if (row.length >= 3) {
+        result = true;
+        removeThese = this.merge(removeThese.concat(row));
+      }
+    });
+    return result ? removeThese : [];
   }
 
-  getEnd() {
-
+  getEnd(jewels = []) {
+    let jewelA = jewels.length - 2;
+    let jewelB = jewels.length - 1;
+    const nextJewel = this.getJewel(
+      jewels[jewelA].pos.next(jewels[jewelB].pos)
+    );
+    if (nextJewel.matches(jewelA)) {
+      jewels.push(nextJewel);
+      return this.getEnd(jewels);
+    }
+    return jewels;
   }
 
   getJewel(pos) {
@@ -308,19 +334,59 @@ class Grid {
   }
 
   switchJewels(jewel, otherJewel, delay) {
-
+    jewel.switch(otherJewel, delay);
+    this.updateColumns(jewel, delay);
+    this.updateColumns(otherJewel, delay);
   }
 
-  refillTile(pos) {
-
+  refillTile(positions) {
+    positions.forEach(pos => {
+      for (let y = (pos.y-1); y >= 0; y--) {
+        const replacement = this.columns[pos.x][y];
+        this.columns[pos.x][y+1] = replacement;
+        replacement.moveDown(700);
+      }
+    });
   }
 
   updateColumns(jewel) {
     this.columns[jewel.pos.x][jewel.pos.y] = jewel;
   }
 
-  clear() {
+  clearGrid() {
+    _jewel__WEBPACK_IMPORTED_MODULE_1__["default"].getMoved();
+    setTimeout(() => {
+      const allTiles = [];
+      for (let y = 7; y >= 0; y--) {
+        for (let x = 0; x < 8; x++) {
+          allTiles.push(this.columns[x][y]);
+        }
+      }
+      const oneDown = (i = 0) => {
+        if (i < 9) {
+          setTimeout(() => {
+            allTiles.forEach(jewel => {
+              if (jewels.length === 7) {
+                jewels.remove(0);
+              } else {
+                jewel.moveDown();
+              }
+            });
+            oneDown(i + 1);
+          }, 200);
+        }
+      };
+      oneDown();
+    }, 1000);
+  }
 
+  remove(row) {
+    const removePositions = row.map(jewel => Object.assign(jewel.pos))
+      .sort((a, b) => a.y < b.y ? -1 : 1);
+    row.forEach(jewel => jewel.remove(500));
+    this.refillTile(removePositions);
+    this.progress.update(row);
+    return removePositions;
   }
 
 }
@@ -535,7 +601,7 @@ class Progress {
 
   wholeNothaLevel() {
     const event = new CustomEvent(wholeNothaLevel, {});
-    setTimeOut(() => document.getElementById('grid').dispatchEvent(event), 1000);
+    setTimeOut(() => document.getElementById('board').dispatchEvent(event), 1000);
   }
 
   display(points, pos) {
@@ -570,7 +636,7 @@ class Timer {
 
   reset(time) {
     this.startTime = new Date().getTime();
-    this.time = time;
+    this.totalTime = time;
   }
 
   start() {
@@ -579,12 +645,18 @@ class Timer {
   }
 
   stop() {
-    this.time = this.remaining();
+    this.totalTime = this.timeLeft();
     this.paused = true;
   }
 
-  remaining() {
-    return this.time - (new Date.getTime() - this.startTime);
+  timeLeft() {
+    return this.totalTime - (new Date.getTime() - this.startTime);
+  }
+
+  updateClock() {
+    if (this.paused) return;
+    const timeLeft = Math.ceil(this.timeLeft() /1000);
+    this.clock.innerHTML = timeLeft;
   }
 }
 
