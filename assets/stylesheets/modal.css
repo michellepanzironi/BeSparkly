@@ -1,0 +1,25 @@
+.modal {
+  display: block;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  position: relative;
+  box-shadow: 3px 3px 6px 1px #444;
+  justify-content: space-around;
+  width: 500px;
+  height: 250px;
+  margin: 0 auto;
+  padding: 40px;
+  /* background-color: purple;
+  color: white; */
+  /* font-size: 22px; */
+  border-radius: 20px;
+  border: 3px solid goldenrod;
+  text-align: center;
+}

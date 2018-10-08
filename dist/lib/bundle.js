@@ -407,8 +407,10 @@ __webpack_require__.r(__webpack_exports__);
 JEWEL_TYPES = [
   'orange', 'green', 'blue',
   'cyan', 'pink', 'yellow',
-  'round_rainbow', 'teardrop_rainbow'
+  'round_rainbow'
 ];
+
+// 'teardrop_rainbow'
 
 class Jewel {
   constructor(pos, jewel_type, board) {
@@ -435,7 +437,7 @@ class Jewel {
   reject(delay) {
     setTimeOut(() => {
       this.div.classList.remove('selected');
-    });
+    }, delay);
   }
 
   placeJewel(delay = 1000) {
@@ -451,7 +453,7 @@ class Jewel {
   remove(delay) {
     Jewel.moved.splice(Jewel.moved.indexOf(this), 1);
     setTimeOut(() => {
-      this.div.remove();
+      this.div.classList.remove('removed');
       setTimeOut(() => {
         this.div.remove();
       }, 300);
@@ -485,12 +487,13 @@ class Jewel {
 Jewel.moved = [];
 
 Jewel.getMoved = () => {
-  result = undefined.moved;
+  const result = undefined.moved;
   undefined.moved = [];
   return result;
 };
 
 Jewel.random = (pos, level = JEWEL_TYPES.length, board) => {
+  level = JEWEL_TYPES.length;
   return new Jewel(pos, JEWEL_TYPES[Math.floor(Math.random() * level) % 8], board);
 };
 
@@ -507,6 +510,8 @@ Jewel.random = (pos, level = JEWEL_TYPES.length, board) => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Position; });
+window.GAP = 1;
+
 class Position {
   constructor(x, y) {
     this.x = x;
@@ -529,7 +534,7 @@ class Position {
       new Position(x + 1, y),
       new Position(x, y - 1),
       new Position(x, y + 1)
-    ].filter(pos => pos.isValid);
+    ].filter(pos => pos.isValid());
   }
 
   isValid() {
@@ -548,7 +553,7 @@ class Position {
   }
 
   px() {
-    return new Position(this.x * 60, this.y * 60);
+    return new Position(this.x * GAP, this.y * GAP);
   }
 
   inLine(otherJewel) {
@@ -573,11 +578,11 @@ class Progress {
   constructor() {
     this.bar = document.getElementById('progress');
     this.total = document.getElementById('score');
-    this.flash = document.getElementById('points-flash');
+    this.flash = document.getElementById('points');
     this.points = 0;
   }
 
-  reset(total = 10000) {
+  reset(total = 100000) {
     this.points = 0;
     this.ratio = 100/total;
     this.bar.style.width = '0%';
@@ -588,20 +593,22 @@ class Progress {
     const jewelCount = jewels.length;
     const scoredPoints = (jewelCount ^ 3) * 100;
     this.points += scoredPoints;
+    this.total += scoredPoints;
     setTimeOut(() => {
       this.display(scoredPoints, jewels[1].pos);
       this.bar.classList.add('updating');
       this.bar.style.width = `${Math.min(this.points * this.ratio, 100)}%`;
-      this.total.innerHTML = this.points;
+      this.total.innerHTML = this.total;
     }, 500);
-    if (this.points * this.ratio >= 100) {
+    if (this.points * this.ratio >= 100 && !this.freeze) {
       this.wholeNothaLevel();
+      this.freeze = true;
     }
   }
 
   wholeNothaLevel() {
-    const event = new CustomEvent(wholeNothaLevel, {});
-    setTimeOut(() => document.getElementById('board').dispatchEvent(event), 1000);
+    const event = new CustomEvent('wholeNothaLevel', {});
+    setTimeOut(() =>  document.getElementById('board').dispatchEvent(event), 1000);
   }
 
   display(points, pos) {
@@ -631,7 +638,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Timer; });
 class Timer {
   constructor() {
-    this.clock = document.getElementById('timer');
+    this.clock = document.getElementById('time');
+    setInterval(this.updateClock.bind(this), 100);
   }
 
   reset(time) {
@@ -641,12 +649,12 @@ class Timer {
 
   start() {
     this.startTime = new Date().getTime();
-    this.paused = false;
+    this.stopped = false;
   }
 
   stop() {
     this.totalTime = this.timeLeft();
-    this.paused = true;
+    this.stopped = true;
   }
 
   timeLeft() {
@@ -654,9 +662,15 @@ class Timer {
   }
 
   updateClock() {
-    if (this.paused) return;
     const timeLeft = Math.ceil(this.timeLeft() /1000);
     this.clock.innerHTML = timeLeft;
+    if (timeLeft <= 0) {
+      console.log('game over');
+      this.stop();
+      this.totalTime = 1000;
+      this.startTime = new Date().getTime();
+      document.getElementsByClass('board').dispatchEvent(new CustomEvent('timeout', {}));
+    }
   }
 }
 

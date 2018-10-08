@@ -1,0 +1,23 @@
+.board {
+  border: 3px solid goldenrod;
+  background: transparent;
+  position: relative;
+  -webkit-animation: inner-glow 10s linear infinite;
+  -moz-animation: inner-glow 10s linear infinite;
+  animation: inner-glow 10s linear infinite;
+}
+
+@keyframes inner-glow {
+  0%, 100% {
+    box-shadow: inset 7px -7px 48px -12px goldenrod,
+    inset -7px 7px 48px -12px goldenrod,
+    inset 20px -19px 48px -12px purple,
+    inset -20px 19px 48px -12px purple
+  }
+  50% {
+    box-shadow: inset 14px -14px 48px -12px goldenrod,
+      inset -14px 13px 48px -12px goldenrod,
+      inset 40px -39px 48px -12px purple,
+      inset -40px 39px 48px -12px purple
+  }
+}

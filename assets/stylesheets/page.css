@@ -43,14 +43,52 @@ div {
   padding: 5px;
 }
 
+.clock {
+
+}
+
+.play-pause {
+
+}
+
+.play-pause:hover {
+
+}
+
 .grid-container {
-  background-color: grey;
+  /* background-color: grey; */
   height: 480px;
   width: 480px;
 }
 
+#points {
+  position: absolute;
+  color: transparent;
+  /* width: 5px;
+  height: 2px; */
+  transition: font 0.15s linear;
+}
+
+#points.active {
+  display: block;
+  color: blue;
+  /* width: 200px;
+  height: 100px;
+  font-size: 3em;*/
+}
+
 .progress-bar {
+  border: 3px solid goldenrod;
+  background-color: transparent;
+}
+
+#progress {
   background-color: purple;
+  transition: background-color 0.3s ease;
+}
+
+.progress.updating {
+  background-color: lavender;
 }
 
 .by-me {

@@ -15,4 +15,12 @@ textarea, span, article, footer, time, small {
   box-sizing: inherit;
   background: transparent;
   overflow: hidden;
+  list-style: none;
+  font-size: inherit;
+}
+
+img {
+  display: block;
+  width: 100%;
+  height: auto;
 }

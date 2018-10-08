@@ -13,41 +13,49 @@
   </head>
   <body>
     <div class="whole-page">
-      <div class="title">BESPARKLY</div>
-      <div class="game-board-container">
-        <div class="level-bar">
-          <div class="score">SCORE</div>
-          <div class="level">LEVEL</div>
-        </div>
-        <div class="grid-container">
-          <div class="board">
-
+      <main>
+        <div class="title">BESPARKLY</div>
+        <div class="game-board-container">
+          <div class="controls-container">
+            <div class="play-pause"></div>
+            <div class="stats-bar">
+              <div id="score">SCORE</div>
+              <div class="level">LEVEL</div>
+              <div class="time">TIME</div>
+            </div>
           </div>
-        </div>
-        <div class="progress-bar">[PROGRESS]</div>
-        <div class="by-me">A clone of Bejeweled by Michelle Panzironi</div>
-        <div class="bottom-links">
-          <a href="https://github.com/michellepanzironi"><i class="fab fa-github"></i></a>
-          <a href="https://linkedin.com/in/michellepanzironi"><i class="fab fa-linkedin-in"></i></a>
-          <a href="https://michellepanzironi.com"><i class="fas fa-briefcase"></i></a>
-        </div>
+          <div class="grid-container">
+            <div class="board">
+
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-background"></div>
+            <div class="progress-bar">
+              <div id="progress">[PROGRESS]</div>
+            </div>
+          </div>
+        </main>
+        <footer>
+          <div class="by-me">A clone of Bejeweled by Michelle Panzironi</div>
+          <div class="bottom-links">
+            <a href="https://github.com/michellepanzironi"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/in/michellepanzironi"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://michellepanzironi.com"><i class="fas fa-briefcase"></i></a>
+          </div>
+        </footer>
       </div>
-      <div class="sidebar">
+      <!-- <div class="sidebar">
         <div class="new-game"></div>
-      </div>
+      </div> -->
     </div>
 
     <div class="modal">
-      <div class="modal-container">
-        <div class="modal-content">
-
-        </div>
-        <div class="">
-          Swap jewels to make matching clusters
-          <span>Click anywhere to play</span>
-        </div>
+      <div class="modal-content">
+        Swap jewels to make matching clusters
+        <span>PLAY</span>
       </div>
     </div>
-    
+
   </body>
 </html>

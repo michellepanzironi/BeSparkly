@@ -1,0 +1,29 @@
+.jewel {
+  /* border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 20px;
+  position: absolute;
+  transition: top .5s ease, left .5s ease, width .2s, height .2s; */
+}
+
+.jewel:hover {
+  /* width: 55px;
+  height: 55px; */
+  cursor: pointer;
+  border-style: dashed;
+}
+
+.jewel.removed {
+  width: 4px;
+  height: 4px;
+  /* margin: 28px; */
+}
+
+/* jewel types .color and .color.selected */
+/* background images as url{'..filepath'} */
+/* background-repeat: round; */
+
+/* 'orange', 'green', 'blue',
+'cyan', 'pink', 'yellow',
+'round_rainbow' */
