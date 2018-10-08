@@ -1,17 +1,16 @@
 .jewel {
-  /* border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  margin: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  /* margin: 20px; */
   position: absolute;
-  transition: top .5s ease, left .5s ease, width .2s, height .2s; */
+  transition: top .5s ease, left .5s ease, width .2s, height .2s;
 }
 
 .jewel:hover {
-  /* width: 55px;
-  height: 55px; */
+  width: 65px;
+  height: 65px;
   cursor: pointer;
-  border-style: dashed;
 }
 
 .jewel.removed {
@@ -20,10 +19,45 @@
   /* margin: 28px; */
 }
 
-/* jewel types .color and .color.selected */
-/* background images as url{'..filepath'} */
-/* background-repeat: round; */
+.jewel.selected {
+  border-style: dashed;
+}
 
-/* 'orange', 'green', 'blue',
+/* JEWEL_TYPES = 'orange', 'green', 'blue',
 'cyan', 'pink', 'yellow',
 'round_rainbow' */
+
+.orange {
+  background-image: url('../images/orange_gem_1.png');
+  background-repeat: round;
+}
+
+.green {
+  background-image: url('../images/green_gem_3.png');
+  background-repeat: round;
+}
+
+.blue {
+  background-image: url('../images/blue_gem_2.png');
+  background-repeat: round;
+}
+
+.cyan {
+  background-image: url('../images/cyan_gem_6.png');
+  background-repeat: round;
+}
+
+.pink {
+  background-image: url('../images/pink_gem_7.png');
+  background-repeat: round;
+}
+
+.yellow {
+  background-image: url('../images/yellow_gem_7.png');
+  background-repeat: round;
+}
+
+.round_rainbow {
+  background-image: url('../images/round_gem.png');
+  background-repeat: round;
+}

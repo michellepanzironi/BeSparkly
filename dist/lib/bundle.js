@@ -151,17 +151,26 @@ __webpack_require__.r(__webpack_exports__);
 class Game {
   constructor() {
     this.board = document.getElementById('board');
-    this.levelBar = document.getElementById('level-bar');
+    this.board.addEventListener('incrementLevel', this.incrementLevel.bind(this));
+    this.board.addEventListener('timeout', this.gameOver.bind(this));
+    this.levels = document.getElementById('level');
     this.modal = document.getElementById('modal');
-    this.modalContent = document.getElementById('modal-content');
+    this.modal.addEventListener('click', this.play.bind(this));
     this.level = 1;
+    this.modalContent = document.getElementById('modal-content');
     this.modalContent.innerHTML = `Level ${this.level}`;
     this.grid = new _grid__WEBPACK_IMPORTED_MODULE_0__["default"](this, this.level);
-    this.newLevel = newLevel();
     this.timer = new _timer__WEBPACK_IMPORTED_MODULE_2__["default"]();
+    this.pauseButton = document.getElementById('play-pause');
+    this.pauseButton.addEventListener('click', this.pause.bind(this));
+    this.newLevel();
+    this.pause();
   }
   newLevel() {
     this.level.innerHTML = `Level ${this.level}`;
+    this.grid.reset();
+    this.timer.reset(200 * 1000 - (20 * this.level));
+    this.grid.frozen = false;
   }
 
   incrementLevel() {
@@ -171,6 +180,8 @@ class Game {
   }
 
   levelOver(delay) {
+    this.grid.frozen = true;
+    this.pause();
     this.grid.clearGrid();
     setTimeout(() => {
       this.nextLevel();
@@ -180,6 +191,8 @@ class Game {
   gameOver() {
     this.levelOver(3000);
     this.modalContent.innerHTML = `Game over :( <br /> Play again?`;
+    this.grid.progress.total = 0;
+    this.grid.level = 1;
   }
 
   pause() {
@@ -190,7 +203,7 @@ class Game {
   play() {
     if (this.grid.frozen) return;
     this.modal.style.display = 'none';
-    this.modalContent.innerHTML = `Level ${this.level - 4}`;
+    this.modalContent.innerHTML = `Level ${this.level}`;
     this.grid.start();
     this.time.start();
   }
