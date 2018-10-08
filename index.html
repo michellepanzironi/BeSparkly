@@ -4,11 +4,13 @@
     <meta charset="utf-8">
     <title>BeSparkly</title>
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/reset.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/page.css">
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/board.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/jewel.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/modal.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/page.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:900" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-
+    <script type="text/javascript" src="./dist/bundle.js"></script>
     <meta name="robots" content="noindex,nofollow">
   </head>
   <body>
@@ -17,7 +19,7 @@
         <div class="title">BESPARKLY</div>
         <div class="game-board-container">
           <div class="controls-container">
-            <div id="play-pause"></div>
+            <div id="play-pause">PLAY</div>
             <div class="stats-bar">
               <div id="score">SCORE</div>
               <div id="level">LEVEL</div>
@@ -25,7 +27,7 @@
             </div>
           </div>
           <div class="grid-container">
-            <div class="board">
+            <div id="board">
 
             </div>
           </div>
@@ -45,15 +47,12 @@
           </div>
         </footer>
       </div>
-      <!-- <div class="sidebar">
-        <div class="new-game"></div>
-      </div> -->
     </div>
 
     <div id="modal">
       <div id="modal-content">
         Swap jewels to make matching clusters
-        <span>PLAY</span>
+        <span>CLICK TO PLAY</span>
       </div>
     </div>
 

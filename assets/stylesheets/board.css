@@ -1,10 +1,13 @@
-.board {
+#board {
   border: 3px solid goldenrod;
   background: transparent;
   position: relative;
   -webkit-animation: inner-glow 10s linear infinite;
   -moz-animation: inner-glow 10s linear infinite;
   animation: inner-glow 10s linear infinite;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 @keyframes inner-glow {

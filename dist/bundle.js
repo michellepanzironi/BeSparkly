@@ -99,7 +99,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _jewel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jewel */ "./lib/jewel.js");
 
 
-class EmptyTile {
+class EmptyTile extends _jewel__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor(pos) {
     super(pos, null, 'NULL');
   }
@@ -125,7 +125,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const game = Object(_game__WEBPACK_IMPORTED_MODULE_0__["default"])();
+  const game = new _game__WEBPACK_IMPORTED_MODULE_0__["default"]();
 });
 
 
@@ -167,7 +167,7 @@ class Game {
     this.pause();
   }
   newLevel() {
-    this.level.innerHTML = `Level ${this.level}`;
+    this.levels.innerHTML = `Level ${this.level}`;
     this.grid.reset();
     this.timer.reset(200 * 1000 - (20 * this.level));
     this.grid.frozen = false;
@@ -184,7 +184,7 @@ class Game {
     this.pause();
     this.grid.clearGrid();
     setTimeout(() => {
-      this.nextLevel();
+      this.newLevel();
     }, delay);
   }
 
@@ -237,6 +237,14 @@ class Grid {
     game.board.addEventListener('mousedown', this.handleSelect.bind(this));
     this.progress = new _progress__WEBPACK_IMPORTED_MODULE_2__["default"]();
     this.frozen = false;
+    this.moved = [];
+    this.getMoved = this.getMoved.bind(this);
+  }
+
+  getMoved() {
+    const result = this.moved;
+    this.moved = [];
+    return result;
   }
 
   reset() {
@@ -247,14 +255,18 @@ class Grid {
     for (let i = 0; i < 8; i++) {
       this.columns[i] = {};
       for (let j = 0; j < 8; j++) {
-        this.columns[i][j] = _jewel__WEBPACK_IMPORTED_MODULE_1__["default"].random(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](x, y), this.game.board, this.level).place();
+        this.columns[i][j] = new _jewel__WEBPACK_IMPORTED_MODULE_1__["default"](
+          new _position__WEBPACK_IMPORTED_MODULE_0__["default"](i, j),
+          this.game.board,
+          this
+        ).placeJewel();
       }
     }
   }
 
   start() {
     this.frozen = false;
-    this.handleMatch(_jewel__WEBPACK_IMPORTED_MODULE_1__["default"].getMoved());
+    this.handleMatch(this.getMoved());
   }
 
   handleMatch(jewels) {
@@ -265,13 +277,13 @@ class Grid {
     });
     this.removeJewels(this.merge(matched));
     setTimeout(() => {
-      if (!this.frozen) this.handleMatch(_jewel__WEBPACK_IMPORTED_MODULE_1__["default"].getMoved());
+      if (!this.frozen) this.handleMatch(this.getMoved());
     }, 1000);
     return !!matched.length;
   }
 
   handleSelect(e) {
-    if (target.id === 'board' || this.frozen) return;
+    if (e.target.id === 'board' || this.frozen) return;
     const {x, y} = e.target.data;
     this.selectJewel(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](x, y));
   }
@@ -289,15 +301,15 @@ class Grid {
 
   handleSwap(jewel, otherJewel) {
     this.switchJewels(jewel, otherJewel, 0);
-    if (this.handleMatch([jewel, newJewel])) {
-      this.handleMatch([jewel, newJewel]);
+    if (this.handleMatch([jewel, otherJewel])) {
+      this.handleMatch([jewel, otherJewel]);
     } else {
       this.switchJewels(jewel, otherJewel, 500);
     }
   }
 
   switchJewels(jewel, otherJewel, delay) {
-    jewel.switch(otherJewel, delay);
+    jewel.switchWith(otherJewel, delay);
     this.updateColumns(jewel, delay);
     this.updateColumns(otherJewel, delay);
   }
@@ -324,9 +336,7 @@ class Grid {
     let pairs = [];
     let removeThese = [];
     jewel.pos.allNearbyJewels().forEach(pos => {
-      if (this.getJewel(pos).matches(jewel) && !pairs.some(matched => {
-        matched.sameRowAs(pos);
-      })) {
+      if (this.getJewel(pos).matches(jewel)) {
         pairs.push(pos);
       }
     });
@@ -364,11 +374,11 @@ class Grid {
         this.columns[pos.x][y + 1] = replacement;
         replacement.moveDown(700);
       }
-      this.columns[pos.x][0] = _jewel__WEBPACK_IMPORTED_MODULE_1__["default"].random(
+      this.columns[pos.x][0] = new _jewel__WEBPACK_IMPORTED_MODULE_1__["default"](
         new _position__WEBPACK_IMPORTED_MODULE_0__["default"](pos.x, 0),
         this.game.board,
-        this.level
-      ).place(700);
+        this
+      ).placeJewel(700);
     });
   }
 
@@ -377,7 +387,7 @@ class Grid {
   }
 
   clearGrid() {
-    _jewel__WEBPACK_IMPORTED_MODULE_1__["default"].getMoved();
+    this.getMoved();
     setTimeout(() => {
       const allTiles = [];
       for (let y = 7; y >= 0; y--) {
@@ -427,26 +437,24 @@ class Grid {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Jewel; });
-JEWEL_TYPES = [
-  'orange', 'green', 'blue',
-  'cyan', 'pink', 'yellow',
-  'round_rainbow'
-];
-
-// 'teardrop_rainbow'
-
 class Jewel {
-  constructor(pos, jewel_type, board) {
+  constructor(pos, board, grid) {
+    this.types = [
+      'orange', 'green', 'blue',
+      'cyan', 'pink', 'yellow',
+      'round_rainbow'
+    ];
+    this.grid = grid;
     this.board = board;
     this.pos = pos;
     this.row = pos.y;
     this.col = pos.x;
-    this.type = jewel_type;
+    this.type = this.types[Math.floor(Math.random() * (0, 7))];
     this.div = document.createElement('div');
     this.div.style.top = `0px`; //`${this.pos.y * GAP - 1000}px`;
     this.div.style.left = `0px`; //`${this.pos.px().x}px`;
     this.div.data = pos;
-    this.div.className = `${jewel_type} jewel`;
+    this.div.className = `${this.type} jewel`;
   }
 
   matches(otherJewel) {
@@ -463,9 +471,16 @@ class Jewel {
     }, delay);
   }
 
+  animate(newPos, delay) {
+    setTimeout(() => {
+      this.div.style.left = `${newPos.px().x}px`;
+      this.div.style.top = `${newPos.px().y}px`;
+    }, delay);
+  }
+
   placeJewel(delay = 1000) {
-    grid.appendChild(this.div);
-    Jewel.moved.push(this);
+    this.board.appendChild(this.div);
+    this.grid.moved.push(this);
     setTimeout(() => {
       this.div.style.top = `${this.pos.px().y}`;
     }, delay - (this.row * 120) + this.col % 3 * 30);
@@ -474,7 +489,7 @@ class Jewel {
   }
 
   remove(delay) {
-    Jewel.moved.splice(Jewel.moved.indexOf(this), 1);
+    this.grid.moved.splice(this.grid.moved.indexOf(this), 1);
     setTimeout(() => {
       this.div.classList.remove('removed');
       setTimeout(() => {
@@ -486,39 +501,19 @@ class Jewel {
   move(newPos, delay) {
     this.pos = newPos;
     this.div.data = newPos;
-    Jewel.moved.push(this);
+    this.grid.moved.push(this);
     this.animate(newPos, delay);
-  }
-
-  animate(newPos, delay) {
-    setTimeout(() => {
-      this.div.style.left = `${newPos.px().x}px`;
-      this.div.style.top = `${newPos.px().y}px`;
-    }, delay);
   }
 
   moveDown(delay) {
     this.move(this.pos.down(), delay);
   }
 
-  switch(otherJewel, delay) {
+  switchWith(otherJewel, delay) {
     this.move(otherJewel.pos, delay);
     otherJewel.move(this.pos, delay);
   }
 }
-
-Jewel.moved = [];
-
-Jewel.getMoved = () => {
-  const result = undefined.moved;
-  undefined.moved = [];
-  return result;
-};
-
-Jewel.random = (pos, level = JEWEL_TYPES.length, board) => {
-  level = JEWEL_TYPES.length;
-  return new Jewel(pos, JEWEL_TYPES[Math.floor(Math.random() * level) % 8], board);
-};
 
 
 /***/ }),
@@ -663,6 +658,7 @@ class Timer {
   constructor() {
     this.clock = document.getElementById('time');
     setInterval(this.updateClock.bind(this), 100);
+    this.board = document.getElementById('board');
   }
 
   reset(time) {
@@ -681,7 +677,7 @@ class Timer {
   }
 
   timeLeft() {
-    return this.totalTime - (new Date.getTime() - this.startTime);
+    return this.totalTime - (new Date().getTime() - this.startTime);
   }
 
   updateClock() {
@@ -692,7 +688,7 @@ class Timer {
       this.stop();
       this.totalTime = 1000;
       this.startTime = new Date().getTime();
-      document.getElementsByClass('board').dispatchEvent(new CustomEvent('timeout', {}));
+      this.board.dispatchEvent(new CustomEvent('timeout', {}));
     }
   }
 }

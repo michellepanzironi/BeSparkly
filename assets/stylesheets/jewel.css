@@ -1,26 +1,25 @@
 .jewel {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  /* margin: 20px; */
-  position: absolute;
+  width: 55px;
+  height: 55px;
+  /* position: absolute; */
   transition: top .5s ease, left .5s ease, width .2s, height .2s;
+  margin: 2px;
 }
 
 .jewel:hover {
-  width: 65px;
-  height: 65px;
   cursor: pointer;
+}
+
+.jewel.selected {
+  width: 57px;
+  height: 57px;
+  border-style: dashed;
 }
 
 .jewel.removed {
   width: 4px;
   height: 4px;
   /* margin: 28px; */
-}
-
-.jewel.selected {
-  border-style: dashed;
 }
 
 /* JEWEL_TYPES = 'orange', 'green', 'blue',
