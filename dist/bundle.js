@@ -269,31 +269,19 @@ class Grid {
     this.handleMatch(this.getMoved());
   }
 
-  handleMatch(jewels) {
-    if (jewels.length === 0) return false;
-    let matched = [];
-    jewels.forEach(jewel => {
-      matched = matched.concat(this.getAllRows(jewel));
-    });
-    this.removeJewels(this.merge(matched));
-    setTimeout(() => {
-      if (!this.frozen) this.handleMatch(this.getMoved());
-    }, 1000);
-    return !!matched.length;
-  }
-
   handleSelect(e) {
-    if (e.target.id === 'board' || this.frozen) return;
-    const {x, y} = e.target.data;
-    this.selectJewel(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](x, y));
+    const chosen = e.target.data;
+    this.selectJewel(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](chosen.x, chosen.y));
   }
 
   selectJewel(pos) {
     const newJewel = this.getJewel(pos);
-    if (this.selected && this.selected.pos.isNearby(newJewel.pos)) {
-      this.handleSwap(this.selected, newJewel);
-      this.selected.reject(500);
-      this.selected = null;
+    if (this.selected) {
+      if (pos.isNearby(this.selected)) {
+        this.handleSwap(newJewel, this.selected);
+        this.selected.reject(500);
+        this.selected = null;
+      }
     } else {
       this.select(newJewel);
     }
@@ -301,17 +289,18 @@ class Grid {
 
   handleSwap(jewel, otherJewel) {
     this.switchJewels(jewel, otherJewel, 0);
-    if (this.handleMatch([jewel, otherJewel])) {
-      this.handleMatch([jewel, otherJewel]);
-    } else {
-      this.switchJewels(jewel, otherJewel, 500);
-    }
+    this.handleMatch([jewel, otherJewel]) || this.switchJewels(jewel, otherJewel, 300);
   }
 
   switchJewels(jewel, otherJewel, delay) {
     jewel.switchWith(otherJewel, delay);
-    this.updateColumns(jewel, delay);
-    this.updateColumns(otherJewel, delay);
+    this.updateColumns(jewel);
+    this.updateColumns(otherJewel);
+  }
+
+  updateColumns(jewel) {
+    debugger
+    this.columns[jewel.pos.y][jewel.pos.x] = jewel;
   }
 
   select(jewel) {
@@ -322,6 +311,20 @@ class Grid {
 
   merge(jewels) {
     return jewels.filter((jewel, idx) => jewels.indexOf(jewel) === idx);
+  }
+
+
+  handleMatch(jewelsArr) {
+    if (jewelsArr.length === 0) return false;
+    let matched = [];
+    jewelsArr.forEach(jewel => {
+      matched = matched.concat(this.getAllRows(jewel));
+    });
+    this.removeJewels(this.merge(matched));
+    setTimeout(() => {
+      if (!this.frozen) this.handleMatch(this.getMoved());
+    }, 1000);
+    return !!matched.length;
   }
 
   getRow(jewel, otherJewel) {
@@ -382,10 +385,6 @@ class Grid {
     });
   }
 
-  updateColumns(jewel) {
-    this.columns[jewel.pos.x][jewel.pos.y] = jewel;
-  }
-
   clearGrid() {
     this.getMoved();
     setTimeout(() => {
@@ -399,8 +398,8 @@ class Grid {
         if (i < 9) {
           setTimeout(() => {
             allTiles.forEach(jewel => {
-              if (jewels.pos.y === 7) {
-                jewels.remove(0);
+              if (jewel.pos.y === 7) {
+                jewel.remove(0);
               } else {
                 jewel.moveDown();
               }
@@ -447,8 +446,8 @@ class Jewel {
     this.grid = grid;
     this.board = board;
     this.pos = pos;
-    this.row = pos.y;
-    this.col = pos.x;
+    this.y = pos.y;
+    this.x = pos.x;
     this.type = this.types[Math.floor(Math.random() * (0, 7))];
     this.div = document.createElement('div');
     this.div.style.top = `0px`; //`${this.pos.y * GAP - 1000}px`;
@@ -472,6 +471,7 @@ class Jewel {
   }
 
   animate(newPos, delay) {
+    debugger
     setTimeout(() => {
       this.div.style.left = `${newPos.px().x}px`;
       this.div.style.top = `${newPos.px().y}px`;
@@ -483,7 +483,7 @@ class Jewel {
     this.grid.moved.push(this);
     setTimeout(() => {
       this.div.style.top = `${this.pos.px().y}`;
-    }, delay - (this.row * 120) + this.col % 3 * 30);
+    }, delay - (this.y * 120) + this.x % 3 * 30);
 
     return this;
   }
@@ -528,8 +528,6 @@ class Jewel {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Position; });
-window.GAP = 1;
-
 class Position {
   constructor(x, y) {
     this.x = x;
@@ -560,10 +558,15 @@ class Position {
   }
 
   isNearby(otherJewel) {
-    const {x, y} = this;
-    return (x === otherJewel.x || y === otherJewel.y) &&
-      (x + 1 === otherJewel.x || x - 1 === otherJewel.x ||
-        y + 1 === otherJewel.y || y -1 === otherJewel.y);
+    if (this.x === otherJewel.x) {
+      //same row
+      if (this.y + 1 === otherJewel.y || this.y - 1 === otherJewel.y) return true;
+    } else if (this.y === otherJewel.y) {
+      //same col
+      if (this.x + 1 === otherJewel.x || this.x - 1 === otherJewel.x) return true;
+    } else {
+      return false;
+    }
   }
 
   down() {
@@ -571,7 +574,7 @@ class Position {
   }
 
   px() {
-    return new Position(this.x * GAP, this.y * GAP);
+    return new Position(this.x, this.y);
   }
 
   inLine(otherJewel) {

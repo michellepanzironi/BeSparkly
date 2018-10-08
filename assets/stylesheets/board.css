@@ -1,5 +1,5 @@
 #board {
-  border: 3px solid goldenrod;
+  /* border: 3px solid purple; */
   background: transparent;
   position: relative;
   -webkit-animation: inner-glow 10s linear infinite;

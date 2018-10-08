@@ -11,8 +11,7 @@
 }
 
 .jewel.selected {
-  width: 57px;
-  height: 57px;
+  border: 1px solid purple;
   border-style: dashed;
 }
 

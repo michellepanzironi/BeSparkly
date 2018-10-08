@@ -18,8 +18,8 @@ div {
   font-size: 48px;
   font-weight: lighter;
   letter-spacing: 5px;
-  padding: 10px;
   text-shadow: -2px 3px 0 purple;
+  padding: 10px;
   /* text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px purple, 0 0 30px purple, 0 0 40px purple, 0 0 50px purple, 0 0 75px purple; */
 }
 
@@ -32,19 +32,19 @@ div {
   height: 25px;
   display: flex;
   justify-content: space-between;
-  background-color: purple;
+  background-color: transparent;
+  letter-spacing: 5px;
+  font-size: 18px;
+  padding: 5px;
 }
 
 #score {
-  padding: 5px;
 }
 
 #level {
-  padding: 5px;
 }
 
 #time {
-  padding: 5px;
 }
 
 #play-pause {
