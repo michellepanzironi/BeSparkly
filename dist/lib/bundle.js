@@ -223,6 +223,7 @@ class Grid {
     this.game = game;
     game.board.addEventListener('mousedown', this.handleSelect.bind(this));
     this.progress = new _progress__WEBPACK_IMPORTED_MODULE_2__["default"]();
+    this.frozen = false;
   }
 
   reset() {
@@ -232,13 +233,14 @@ class Grid {
     this.columns = {};
     for (let i = 0; i < 8; i++) {
       this.columns[i] = {};
-      for (let j = 0; j < array.length; j++) {
+      for (let j = 0; j < 8; j++) {
         this.columns[i][j] = _jewel__WEBPACK_IMPORTED_MODULE_1__["default"].random(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](x, y), this.game.board, this.level).place();
       }
     }
   }
 
   start() {
+    this.frozen = false;
     this.handleMatch(_jewel__WEBPACK_IMPORTED_MODULE_1__["default"].getMoved());
   }
 
@@ -246,16 +248,19 @@ class Grid {
     if (jewels.length === 0) return false;
     let matched = [];
     jewels.forEach(jewel => {
-      matched.concat(this.getAllRows(jewel));
+      matched = matched.concat(this.getAllRows(jewel));
     });
-    this.remove(this.merge(matched));
+    this.removeJewels(this.merge(matched));
+    setTimeout(() => {
+      if (!this.frozen) this.handleMatch(_jewel__WEBPACK_IMPORTED_MODULE_1__["default"].getMoved());
+    }, 1000);
     return !!matched.length;
   }
 
   handleSelect(e) {
-    if (target.id === 'board') return;
+    if (target.id === 'board' || this.frozen) return;
     const {x, y} = e.target.data;
-    this.selectJewel(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](x,y));
+    this.selectJewel(new _position__WEBPACK_IMPORTED_MODULE_0__["default"](x, y));
   }
 
   selectJewel(pos) {
@@ -276,6 +281,12 @@ class Grid {
     } else {
       this.switchJewels(jewel, otherJewel, 500);
     }
+  }
+
+  switchJewels(jewel, otherJewel, delay) {
+    jewel.switch(otherJewel, delay);
+    this.updateColumns(jewel, delay);
+    this.updateColumns(otherJewel, delay);
   }
 
   select(jewel) {
@@ -317,12 +328,12 @@ class Grid {
   }
 
   getEnd(jewels = []) {
-    let jewelA = jewels.length - 2;
-    let jewelB = jewels.length - 1;
+    let idxA = jewels.length - 2;
+    let idxB = jewels.length - 1;
     const nextJewel = this.getJewel(
-      jewels[jewelA].pos.next(jewels[jewelB].pos)
+      jewels[idxA].pos.next(jewels[idxB].pos)
     );
-    if (nextJewel.matches(jewelA)) {
+    if (nextJewel.matches(idxA)) {
       jewels.push(nextJewel);
       return this.getEnd(jewels);
     }
@@ -333,19 +344,18 @@ class Grid {
     return pos.isValid() ? this.columns[pos.x][pos.y] : new _emptyTile__WEBPACK_IMPORTED_MODULE_3__["default"](pos);
   }
 
-  switchJewels(jewel, otherJewel, delay) {
-    jewel.switch(otherJewel, delay);
-    this.updateColumns(jewel, delay);
-    this.updateColumns(otherJewel, delay);
-  }
-
   refillTile(positions) {
     positions.forEach(pos => {
-      for (let y = (pos.y-1); y >= 0; y--) {
+      for (let y = pos.y - 1; y >= 0; y--) {
         const replacement = this.columns[pos.x][y];
-        this.columns[pos.x][y+1] = replacement;
+        this.columns[pos.x][y + 1] = replacement;
         replacement.moveDown(700);
       }
+      this.columns[pos.x][0] = _jewel__WEBPACK_IMPORTED_MODULE_1__["default"].random(
+        new _position__WEBPACK_IMPORTED_MODULE_0__["default"](pos.x, 0),
+        this.game.board,
+        this.level
+      ).place(700);
     });
   }
 
@@ -366,7 +376,7 @@ class Grid {
         if (i < 9) {
           setTimeout(() => {
             allTiles.forEach(jewel => {
-              if (jewels.length === 7) {
+              if (jewels.pos.y === 7) {
                 jewels.remove(0);
               } else {
                 jewel.moveDown();
@@ -380,7 +390,7 @@ class Grid {
     }, 1000);
   }
 
-  remove(row) {
+  removeJewels(row) {
     const removePositions = row.map(jewel => Object.assign(jewel.pos))
       .sort((a, b) => a.y < b.y ? -1 : 1);
     row.forEach(jewel => jewel.remove(500));
@@ -435,7 +445,7 @@ class Jewel {
   }
 
   reject(delay) {
-    setTimeOut(() => {
+    setTimeout(() => {
       this.div.classList.remove('selected');
     }, delay);
   }
@@ -443,7 +453,7 @@ class Jewel {
   placeJewel(delay = 1000) {
     grid.appendChild(this.div);
     Jewel.moved.push(this);
-    setTimeOut(() => {
+    setTimeout(() => {
       this.div.style.top = `${this.pos.px().y}`;
     }, delay - (this.row * 120) + this.col % 3 * 30);
 
@@ -452,9 +462,9 @@ class Jewel {
 
   remove(delay) {
     Jewel.moved.splice(Jewel.moved.indexOf(this), 1);
-    setTimeOut(() => {
+    setTimeout(() => {
       this.div.classList.remove('removed');
-      setTimeOut(() => {
+      setTimeout(() => {
         this.div.remove();
       }, 300);
     }, delay);
@@ -468,7 +478,7 @@ class Jewel {
   }
 
   animate(newPos, delay) {
-    setTimeOut(() => {
+    setTimeout(() => {
       this.div.style.left = `${newPos.px().x}px`;
       this.div.style.top = `${newPos.px().y}px`;
     }, delay);
@@ -594,7 +604,7 @@ class Progress {
     const scoredPoints = (jewelCount ^ 3) * 100;
     this.points += scoredPoints;
     this.total += scoredPoints;
-    setTimeOut(() => {
+    setTimeout(() => {
       this.display(scoredPoints, jewels[1].pos);
       this.bar.classList.add('updating');
       this.bar.style.width = `${Math.min(this.points * this.ratio, 100)}%`;
@@ -608,7 +618,7 @@ class Progress {
 
   wholeNothaLevel() {
     const event = new CustomEvent('wholeNothaLevel', {});
-    setTimeOut(() =>  document.getElementById('board').dispatchEvent(event), 1000);
+    setTimeout(() =>  document.getElementById('board').dispatchEvent(event), 1000);
   }
 
   display(points, pos) {
@@ -616,7 +626,7 @@ class Progress {
     this.flash.style.top = `${pos.px().y}px`;
     this.flash.style.left = `${pos.px().x}px`;
     this.flash.classList.add('active');
-    setTimeOut(() => {
+    setTimeout(() => {
       this.bar.classList.remove('updating');
       this.bar.classList.remove('active');
     }, 600);
