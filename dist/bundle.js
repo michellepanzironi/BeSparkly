@@ -154,34 +154,24 @@ class Game {
     this.board.addEventListener('incrementLevel', this.incrementLevel.bind(this));
     this.board.addEventListener('timeout', this.gameOver.bind(this));
     this.levels = document.getElementById('level');
-    this.modal = document.getElementById('modal');
-    this.modal.addEventListener('click', this.play.bind(this));
     this.level = 1;
-    this.modalContent = document.getElementById('modal-content');
-    this.modalContent.innerHTML = `Level ${this.level}`;
     this.grid = new _grid__WEBPACK_IMPORTED_MODULE_0__["default"](this, this.level);
     this.timer = new _timer__WEBPACK_IMPORTED_MODULE_2__["default"]();
-    this.pauseButton = document.getElementById('play-pause');
-    this.pauseButton.addEventListener('click', this.pause.bind(this));
     this.newLevel();
-    this.pause();
+    this.play();
   }
   newLevel() {
     this.levels.innerHTML = `Level ${this.level}`;
     this.grid.reset();
     this.timer.reset(200 * 1000 - (20 * this.level));
-    this.grid.frozen = false;
   }
 
   incrementLevel() {
     this.levelOver(3000);
     this.level += 1;
-    this.modalContent.innerHTML = `Level ${this.level}`;
   }
 
   levelOver(delay) {
-    this.grid.frozen = true;
-    this.pause();
     this.grid.clearGrid();
     setTimeout(() => {
       this.newLevel();
@@ -190,20 +180,11 @@ class Game {
 
   gameOver() {
     this.levelOver(3000);
-    this.modalContent.innerHTML = `Game over :( <br /> Play again?`;
     this.grid.progress.total = 0;
     this.grid.level = 1;
   }
 
-  pause() {
-    this.timer.stop();
-    this.modal.style.display = 'block';
-  }
-
   play() {
-    if (this.grid.frozen) return;
-    this.modal.style.display = 'none';
-    this.modalContent.innerHTML = `Level ${this.level}`;
     this.grid.start();
     this.time.start();
   }
@@ -236,13 +217,12 @@ class Grid {
     this.game = game;
     game.board.addEventListener('mousedown', this.handleSelect.bind(this));
     this.progress = new _progress__WEBPACK_IMPORTED_MODULE_2__["default"]();
-    this.frozen = false;
     this.moved = [];
     this.getMoved = this.getMoved.bind(this);
   }
 
   getMoved() {
-    const result = this.moved;
+    const result = this.moved.slice();
     this.moved = [];
     return result;
   }
@@ -265,8 +245,9 @@ class Grid {
   }
 
   start() {
-    this.frozen = false;
-    this.handleMatch(this.getMoved());
+    const newBoard = this.getMoved();
+    debugger
+    this.handleMatch(newBoard);
   }
 
   handleSelect(e) {
@@ -320,23 +301,17 @@ class Grid {
     jewelsArr.forEach(jewel => {
       matched = matched.concat(this.getAllRows(jewel));
     });
-    this.removeJewels(this.merge(matched));
-    setTimeout(() => {
-      if (!this.frozen) this.handleMatch(this.getMoved());
-    }, 1000);
+    debugger
+    this.removeJewels(matched);
+    setTimeout(() => this.handleMatch(this.getMoved()), 1000);
     return !!matched.length;
   }
 
-  getRow(jewel, otherJewel) {
-    const start = this.getEnd([jewel, otherJewel]);
-    const end = this.getEnd([jewel, otherJewel]).slice(2);
-    end.reverse();
-    return start.concat(end);
-  }
-
   getAllRows(jewel) {
-    let result = false;
+    debugger
+    let foundMatches = false;
     let pairs = [];
+    // pos of matching jewels next to each other
     let removeThese = [];
     jewel.pos.allNearbyJewels().forEach(pos => {
       if (this.getJewel(pos).matches(jewel)) {
@@ -346,14 +321,24 @@ class Grid {
     pairs.forEach(pos => {
       const row = this.getRow(jewel, this.getJewel(pos));
       if (row.length >= 3) {
-        result = true;
+        foundMatches = true;
         removeThese = this.merge(removeThese.concat(row));
       }
     });
-    return result ? removeThese : [];
+    return foundMatches ? removeThese : [];
+  }
+
+  getRow(jewel, otherJewel) {
+    debugger
+    const start = this.getEnd([jewel, otherJewel]);
+    const end = this.getEnd([jewel, otherJewel]).slice(2);
+    end.reverse();
+    return start.concat(end);
+    //returns array of matching jewel objects
   }
 
   getEnd(jewels = []) {
+    debugger
     let idxA = jewels.length - 2;
     let idxB = jewels.length - 1;
     const nextJewel = this.getJewel(
@@ -502,6 +487,7 @@ class Jewel {
     this.pos = newPos;
     this.div.data = newPos;
     this.grid.moved.push(this);
+    debugger
     this.animate(newPos, delay);
   }
 
@@ -544,13 +530,15 @@ class Position {
   }
 
   allNearbyJewels() {
-    const {x, y} = this;
+    const x = this.x;
+    const y = this.y;
     return [
       new Position(x - 1, y),
       new Position(x + 1, y),
       new Position(x, y - 1),
       new Position(x, y + 1)
     ].filter(pos => pos.isValid());
+    //returns an array of valid pos for nearby jewels
   }
 
   isValid() {
