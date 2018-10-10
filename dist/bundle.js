@@ -186,7 +186,7 @@ class Game {
 
   play() {
     this.grid.start();
-    this.time.start();
+    this.timer.start();
   }
 }
 
@@ -205,9 +205,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Grid; });
 /* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./position */ "./lib/position.js");
 /* harmony import */ var _jewel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jewel */ "./lib/jewel.js");
-/* harmony import */ var _progress__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./progress */ "./lib/progress.js");
-/* harmony import */ var _emptyTile__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./emptyTile */ "./lib/emptyTile.js");
-
+/* harmony import */ var _emptyTile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./emptyTile */ "./lib/emptyTile.js");
 
 
 
@@ -216,21 +214,24 @@ class Grid {
   constructor(game, level) {
     this.game = game;
     game.board.addEventListener('mousedown', this.handleSelect.bind(this));
-    this.progress = new _progress__WEBPACK_IMPORTED_MODULE_2__["default"]();
-    this.moved = [];
-    this.getMoved = this.getMoved.bind(this);
-  }
-
-  getMoved() {
-    const result = this.moved.slice();
-    this.moved = [];
-    return result;
+    this.removeJewels = this.removeJewels.bind(this);
+    this.handleSwap = this.handleSwap.bind(this);
+    this.refillTile = this.refillTile.bind(this);
+    this.switchJewels = this.switchJewels.bind(this);
+    this.getJewel = this.getJewel.bind(this);
+    this.clearGrid = this.clearGrid.bind(this);
+    this.getMatchedJewels = this.getMatchedJewels.bind(this);
+    this.handleMatches = this.handleMatches.bind(this);
+    this.start = this.start.bind(this);
+    this.reset = this.reset.bind(this);
+    this.selectJewel = this.selectJewel.bind(this);
+    this.updateColumns = this.updateColumns.bind(this);
+    this.select = this.select.bind(this);
   }
 
   reset() {
     this.level = this.game.level;
     this.game.board.innerHTML = '';
-
     this.columns = {};
     for (let i = 0; i < 8; i++) {
       this.columns[i] = {};
@@ -245,9 +246,7 @@ class Grid {
   }
 
   start() {
-    const newBoard = this.getMoved();
-    debugger
-    this.handleMatch(newBoard);
+    this.handleMatches();
   }
 
   handleSelect(e) {
@@ -270,7 +269,7 @@ class Grid {
 
   handleSwap(jewel, otherJewel) {
     this.switchJewels(jewel, otherJewel, 0);
-    this.handleMatch([jewel, otherJewel]) || this.switchJewels(jewel, otherJewel, 300);
+    this.handleMatches() || this.switchJewels(jewel, otherJewel, 300);
   }
 
   switchJewels(jewel, otherJewel, delay) {
@@ -280,7 +279,6 @@ class Grid {
   }
 
   updateColumns(jewel) {
-    debugger
     this.columns[jewel.pos.y][jewel.pos.x] = jewel;
   }
 
@@ -290,69 +288,59 @@ class Grid {
     jewel.select();
   }
 
-  merge(jewels) {
-    return jewels.filter((jewel, idx) => jewels.indexOf(jewel) === idx);
-  }
-
-
-  handleMatch(jewelsArr) {
-    if (jewelsArr.length === 0) return false;
-    let matched = [];
-    jewelsArr.forEach(jewel => {
-      matched = matched.concat(this.getAllRows(jewel));
-    });
-    debugger
-    this.removeJewels(matched);
-    setTimeout(() => this.handleMatch(this.getMoved()), 1000);
-    return !!matched.length;
-  }
-
-  getAllRows(jewel) {
-    debugger
-    let foundMatches = false;
-    let pairs = [];
-    // pos of matching jewels next to each other
-    let removeThese = [];
-    jewel.pos.allNearbyJewels().forEach(pos => {
-      if (this.getJewel(pos).matches(jewel)) {
-        pairs.push(pos);
+  handleMatches() {
+    let found = true;
+    while (found) {
+      let matches = this.getMatchedJewels();
+      if (matches.length === 0) {
+        console.log("Bye, Brendon");
+        console.log(matches);
+        found = false;
+      } else {
+        found = true;
+        this.removeJewels(matches);
+        console.log("Hi, Brendon");
+        console.log(matches);
       }
-    });
-    pairs.forEach(pos => {
-      const row = this.getRow(jewel, this.getJewel(pos));
-      if (row.length >= 3) {
-        foundMatches = true;
-        removeThese = this.merge(removeThese.concat(row));
-      }
-    });
-    return foundMatches ? removeThese : [];
-  }
-
-  getRow(jewel, otherJewel) {
-    debugger
-    const start = this.getEnd([jewel, otherJewel]);
-    const end = this.getEnd([jewel, otherJewel]).slice(2);
-    end.reverse();
-    return start.concat(end);
-    //returns array of matching jewel objects
-  }
-
-  getEnd(jewels = []) {
-    debugger
-    let idxA = jewels.length - 2;
-    let idxB = jewels.length - 1;
-    const nextJewel = this.getJewel(
-      jewels[idxA].pos.next(jewels[idxB].pos)
-    );
-    if (nextJewel.matches(idxA)) {
-      jewels.push(nextJewel);
-      return this.getEnd(jewels);
     }
-    return jewels;
+  }
+
+  getMatchedJewels() {
+    let matches = [];
+    //vert matches
+    for (let j = 0; j < 8; j++) {
+      for (let i = 0; i < 6; i++) {
+        let one = this.columns[i][j];
+        let two = this.columns[i+1][j];
+        let three = this.columns[i+2][j];
+        if (one.type === two.type && two.type === three.type) {
+          matches = matches.concat([one, two, three]);
+        }
+      }
+    }
+    //horiz matches
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 6; j++) {
+        let won = this.columns[i][j];
+        let too = this.columns[i][j+1];
+        let there = this.columns[i][j+2];
+        if (won.type === too.type && too.type === there.type) {
+          matches = matches.concat([won, too, there]);
+        }
+      }
+    }
+    let result = [];
+    for (let i = 0; i < matches.length; i++) {
+        if (!result.includes(matches[i])) {
+            result.push(matches[i]);
+        }
+    }
+    return result;
   }
 
   getJewel(pos) {
-    return pos.isValid() ? this.columns[pos.x][pos.y] : new _emptyTile__WEBPACK_IMPORTED_MODULE_3__["default"](pos);
+    // return pos.isValid() ? this.columns[pos.x][pos.y] : new emptyTile(pos);
+    if (pos.isValid()) return this.columns[pos.x][pos.y];
   }
 
   refillTile(positions) {
@@ -371,7 +359,6 @@ class Grid {
   }
 
   clearGrid() {
-    this.getMoved();
     setTimeout(() => {
       const allTiles = [];
       for (let y = 7; y >= 0; y--) {
@@ -397,15 +384,13 @@ class Grid {
     }, 1000);
   }
 
-  removeJewels(row) {
-    const removePositions = row.map(jewel => Object.assign(jewel.pos))
+  removeJewels(jewels) {
+    const removePositions = jewels.map(jewel => Object.assign(jewel.pos))
       .sort((a, b) => a.y < b.y ? -1 : 1);
-    row.forEach(jewel => jewel.remove(500));
+    jewels.forEach(jewel => jewel.remove(500));
     this.refillTile(removePositions);
-    this.progress.update(row);
     return removePositions;
   }
-
 }
 
 
@@ -428,12 +413,12 @@ class Jewel {
       'cyan', 'pink', 'yellow',
       'round_rainbow'
     ];
+    this.type = this.types[Math.floor(Math.random() * (0, 7))];
     this.grid = grid;
     this.board = board;
     this.pos = pos;
     this.y = pos.y;
     this.x = pos.x;
-    this.type = this.types[Math.floor(Math.random() * (0, 7))];
     this.div = document.createElement('div');
     this.div.style.top = `0px`; //`${this.pos.y * GAP - 1000}px`;
     this.div.style.left = `0px`; //`${this.pos.px().x}px`;
@@ -456,7 +441,6 @@ class Jewel {
   }
 
   animate(newPos, delay) {
-    debugger
     setTimeout(() => {
       this.div.style.left = `${newPos.px().x}px`;
       this.div.style.top = `${newPos.px().y}px`;
@@ -465,7 +449,6 @@ class Jewel {
 
   placeJewel(delay = 1000) {
     this.board.appendChild(this.div);
-    this.grid.moved.push(this);
     setTimeout(() => {
       this.div.style.top = `${this.pos.px().y}`;
     }, delay - (this.y * 120) + this.x % 3 * 30);
@@ -474,7 +457,6 @@ class Jewel {
   }
 
   remove(delay) {
-    this.grid.moved.splice(this.grid.moved.indexOf(this), 1);
     setTimeout(() => {
       this.div.classList.remove('removed');
       setTimeout(() => {
@@ -486,8 +468,6 @@ class Jewel {
   move(newPos, delay) {
     this.pos = newPos;
     this.div.data = newPos;
-    this.grid.moved.push(this);
-    debugger
     this.animate(newPos, delay);
   }
 
@@ -567,68 +547,6 @@ class Position {
 
   inLine(otherJewel) {
     return this.x === otherJewel.x || this.x === otherJewel.y;
-  }
-}
-
-
-/***/ }),
-
-/***/ "./lib/progress.js":
-/*!*************************!*\
-  !*** ./lib/progress.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Progress; });
-class Progress {
-  constructor() {
-    this.bar = document.getElementById('progress');
-    this.total = document.getElementById('score');
-    this.flash = document.getElementById('points');
-    this.points = 0;
-  }
-
-  reset(total = 100000) {
-    this.points = 0;
-    this.ratio = 100/total;
-    this.bar.style.width = '0%';
-  }
-
-  update(jewels) {
-    if (jewels.length === 0) return;
-    const jewelCount = jewels.length;
-    const scoredPoints = (jewelCount ^ 3) * 100;
-    this.points += scoredPoints;
-    this.total += scoredPoints;
-    setTimeout(() => {
-      this.display(scoredPoints, jewels[1].pos);
-      this.bar.classList.add('updating');
-      this.bar.style.width = `${Math.min(this.points * this.ratio, 100)}%`;
-      this.total.innerHTML = this.total;
-    }, 500);
-    if (this.points * this.ratio >= 100 && !this.freeze) {
-      this.wholeNothaLevel();
-      this.freeze = true;
-    }
-  }
-
-  wholeNothaLevel() {
-    const event = new CustomEvent('wholeNothaLevel', {});
-    setTimeout(() =>  document.getElementById('board').dispatchEvent(event), 1000);
-  }
-
-  display(points, pos) {
-    this.flash.innerHTML = points;
-    this.flash.style.top = `${pos.px().y}px`;
-    this.flash.style.left = `${pos.px().x}px`;
-    this.flash.classList.add('active');
-    setTimeout(() => {
-      this.bar.classList.remove('updating');
-      this.bar.classList.remove('active');
-    }, 600);
   }
 }
 
