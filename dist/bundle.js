@@ -271,11 +271,11 @@ class Grid {
   selectJewel(pos) {
     const newJewel = this.getJewel(pos);
     if (this.selected === newJewel) {
-      this.selected.reject();
+      this.selected.reject(); //removes selected class
       this.selected = null;
     } else if (this.selected && this.selected.pos.isNearby(pos)) {
-      this.rebuild();
-      this.selected.reject(); //removes selected class
+      // this.rebuild();
+      this.selected.reject();
       this.handleSwap(newJewel, this.selected);
       this.selected = null;
       this.rebuild();
@@ -293,33 +293,35 @@ class Grid {
 
   handleSwap(jewel, otherJewel) {
     this.switchJewels(jewel, otherJewel);
-    this.rebuild();
     if (this.getMatchedJewels()) {
       console.log("found matches");
       this.handleMatches();
-      this.rebuild();
     } else {
-      this.switchJewels(jewel, otherJewel, 300); //switch them back
-      this.rebuild();
+      this.switchJewels(jewel, otherJewel); //switch them back
     }
   }
 
 
-  switchJewels(jewel, otherJewel, delay) {
-    setTimeout(() => {
-      this.newJewelPositions(jewel, otherJewel); //swaps pos on jewels
-      console.log("newJewelPositions ran");
-      this.newGridPositions(jewel, otherJewel);
-      console.log("newGridPositions ran");
-      this.rebuild();
-    }, delay);
+  switchJewels(jewel, otherJewel) {
+    this.newJewelPositions(jewel, otherJewel); //swaps pos on jewels
+    console.log("newJewelPositions ran");
+    this.newGridPositions(jewel, otherJewel);
+    console.log("newGridPositions ran");
+    this.rebuild();
   }
 
   newJewelPositions(jewel, otherJewel) {
     const jewelAPos = new _position__WEBPACK_IMPORTED_MODULE_0__["default"](jewel.pos.x, jewel.pos.y);
     const jewelBPos = new _position__WEBPACK_IMPORTED_MODULE_0__["default"](otherJewel.pos.x, otherJewel.pos.y);
     jewel.pos = jewelBPos;
+    jewel.div.data = jewelBPos;
+    jewel.x = jewelBPos.x;
+    jewel.y = jewelBPos.y;
     otherJewel.pos = jewelAPos;
+    otherJewel.div.data = jewelAPos;
+    otherJewel.x = jewelAPos.x;
+    otherJewel.y = jewelAPos.y;
+    this.rebuild();
   }
 
   newGridPositions(jewel, otherJewel) {
@@ -331,7 +333,6 @@ class Grid {
   }
 
   handleMatches() {
-    console.log("handleMatches ran");
     let found = true;
     while (found) {
       let matches = this.getMatchedJewels();
@@ -395,11 +396,8 @@ class Grid {
       shiftDownJewels.push(this.rows[x][pos.y]);
     } //get all jewels above removed position
     shiftDownJewels.forEach(jewel => {
-      jewel.animateGoDown();
-      console.log("animateGoDown ran");
-    });
-    shiftDownJewels.forEach(jewel => {
       jewel.pos.x = jewel.pos.x+1; //reset jewel pos property to x+1
+      jewel.x = jewel.x+1; //reset jewel x property to x+1
       this.rows[jewel.pos.x][pos.y] = jewel; //place on grid
     });
     let newJewel = new _jewel__WEBPACK_IMPORTED_MODULE_1__["default"](
@@ -408,11 +406,7 @@ class Grid {
       this //create a new jewel for the top of column
     );
     this.rows[0][pos.y] = newJewel;
-    setTimeout(() => {
-      this.rebuild();
-      console.log("timeout rebuild ran");
-    }, 2000);
-
+    this.rebuild();
   }
 
   removeJewels(jewels) {
