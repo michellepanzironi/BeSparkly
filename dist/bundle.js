@@ -274,11 +274,14 @@ class Grid {
       this.selected.reject();
       this.selected = null;
     } else if (this.selected && this.selected.pos.isNearby(pos)) {
+      this.rebuild();
       this.selected.reject(); //removes selected class
       this.handleSwap(newJewel, this.selected);
       this.selected = null;
+      this.rebuild();
     } else {
       this.select(newJewel);
+      this.rebuild();
     }
   }
 
@@ -297,6 +300,7 @@ class Grid {
       this.rebuild();
     } else {
       this.switchJewels(jewel, otherJewel, 300); //switch them back
+      this.rebuild();
     }
   }
 
@@ -307,7 +311,6 @@ class Grid {
       console.log("newJewelPositions ran");
       this.newGridPositions(jewel, otherJewel);
       console.log("newGridPositions ran");
-
       this.rebuild();
     }, delay);
   }
@@ -324,6 +327,7 @@ class Grid {
     const jewelBPos = otherJewel.pos;
     this.rows[jewelAPos.x][jewelAPos.y] = jewel; //swaps pos on grid object
     this.rows[jewelBPos.x][jewelBPos.y] = otherJewel;
+    this.rebuild();
   }
 
   handleMatches() {
@@ -340,8 +344,10 @@ class Grid {
         //setTimeout after animation time
         this.removeJewels(matches);
         console.log(this);
+        this.rebuild();
       }
     }
+    this.rebuild();
   }
 
   getMatchedJewels() {
@@ -383,10 +389,15 @@ class Grid {
   }
 
   refillTile(pos) {
+    console.log("refillTile ran");
     let shiftDownJewels = [];
     for (let x = pos.x-1; x >= 0; x--) {
       shiftDownJewels.push(this.rows[x][pos.y]);
     } //get all jewels above removed position
+    shiftDownJewels.forEach(jewel => {
+      jewel.animateGoDown();
+      console.log("animateGoDown ran");
+    });
     shiftDownJewels.forEach(jewel => {
       jewel.pos.x = jewel.pos.x+1; //reset jewel pos property to x+1
       this.rows[jewel.pos.x][pos.y] = jewel; //place on grid
@@ -397,7 +408,11 @@ class Grid {
       this //create a new jewel for the top of column
     );
     this.rows[0][pos.y] = newJewel;
-    this.rebuild();
+    setTimeout(() => {
+      this.rebuild();
+      console.log("timeout rebuild ran");
+    }, 2000);
+
   }
 
   removeJewels(jewels) {
@@ -469,6 +484,10 @@ class Jewel {
     this.div.data = pos;
     this.div.className = `${this.type} jewel`;
     this.div.id = `[${this.pos.x}, ${this.pos.y}]`;
+    this.animateGoLeft = this.animateGoLeft.bind(this);
+    this.animateGoRight = this.animateGoRight.bind(this);
+    this.animateGoUp = this.animateGoUp.bind(this);
+    this.animateGoDown = this.animateGoDown.bind(this);
   }
 
   matches(otherJewel) {
@@ -483,12 +502,36 @@ class Jewel {
     this.div.classList.remove('selected');
   }
 
-  animate(newPos, delay) {
-    console.log("animate ran");
+  animateGoLeft(newPos) {
+    console.log("animateGoLeft ran");
+    this.div.classList.add('goLeft');
     setTimeout(() => {
-      this.div.style.left = `${newPos.x}px`;
-      this.div.style.top = `${newPos.y}px`;
-    }, delay);
+      this.div.classList.remove('goLeft');
+    }, 2000);
+  }
+
+  animateGoRight(newPos) {
+    console.log("animateGoRight ran");
+    this.div.classList.add('goRight');
+    setTimeout(() => {
+      this.div.classList.remove('goRight');
+    }, 2000);
+  }
+
+  animateGoUp(newPos) {
+    console.log("animateGoUp ran");
+    this.div.classList.add('goUp');
+    setTimeout(() => {
+      this.div.classList.remove('goUp');
+    }, 2000);
+  }
+
+  animateGoDown(newPos) {
+    console.log("animateGoDown ran");
+    this.div.classList.add('goDown');
+    setTimeout(() => {
+      this.div.classList.remove('goDown');
+    }, 2000);
   }
 
   placeJewel(delay = 500) {
@@ -513,19 +556,12 @@ class Jewel {
     console.log("move ran");
     this.pos = newPos;
     this.div.data = newPos;
-    // this.animate(newPos, delay);
   }
 
   moveDown(delay) {
     console.log("moveDown ran");
     this.move(this.pos.down(), delay);
   }
-
-  // switchWith(otherJewel, delay) {
-  //   console.log("switchWith ran");
-  //   this.move(otherJewel.pos, delay);
-  //   otherJewel.move(this.pos, delay);
-  // }
 }
 
 

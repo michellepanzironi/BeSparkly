@@ -4,6 +4,8 @@
   /* position: absolute; */
   transition: top .5s ease, left .5s ease, width .2s, height .2s;
   margin: 2px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
 }
 
 .jewel:hover {
@@ -28,34 +30,61 @@
 .orange {
   background-image: url('../images/orange_gem_1.png');
   background-repeat: round;
+  background-clip: padding-box;
 }
 
 .green {
   background-image: url('../images/green_gem_3.png');
   background-repeat: round;
+  background-clip: padding-box;
 }
 
 .blue {
   background-image: url('../images/blue_gem_2.png');
   background-repeat: round;
+  background-clip: padding-box;
 }
 
 .cyan {
   background-image: url('../images/cyan_gem_6.png');
   background-repeat: round;
+  background-clip: padding-box;
 }
 
 .pink {
   background-image: url('../images/pink_gem_7.png');
   background-repeat: round;
+  background-clip: padding-box;
 }
 
 .yellow {
   background-image: url('../images/yellow_gem_7.png');
   background-repeat: round;
+  background-clip: padding-box;
 }
 
 .round_rainbow {
   background-image: url('../images/round_gem.png');
   background-repeat: round;
+  background-clip: padding-box;
+}
+
+/* animations */
+
+.jewel.goDown{
+  /* move div down by 55px */
+  top: 55px;
+  transition: 2s;
+}
+
+.jewel.goUp{
+  /* move div down by 55px */
+}
+
+.jewel.goLeft{
+  /* move div down by 55px */
+}
+
+.jewel.goRight{
+  /* move div down by 55px */
 }
