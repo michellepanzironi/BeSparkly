@@ -71,20 +71,19 @@
 
 /* animations */
 
-.jewel.goDown{
-  /* move div down by 55px */
+/* .jewel.goDown{
   top: 55px;
-  transition: 2s;
+  transition: 3s;
 }
 
 .jewel.goUp{
-  /* move div down by 55px */
+  /* move div up by 55px */
 }
 
 .jewel.goLeft{
-  /* move div down by 55px */
+  /* move div left by 55px */
 }
 
 .jewel.goRight{
-  /* move div down by 55px */
-}
+  /* move div right by 55px */
+} */

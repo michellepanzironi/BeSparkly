@@ -182,7 +182,7 @@ class Game {
   gameOver() {
     this.levelOver(3000);
     this.grid.level = 1;
-    this.grid.score = 100;
+    this.grid.points = 100;
   }
 
   play() {
@@ -231,7 +231,6 @@ class Grid {
     this.select = this.select.bind(this);
     this.points = 100;
     this.score = document.getElementById('score');
-    this.scorenumber = `${this.points}`;
   }
 
   reset() {
@@ -278,7 +277,6 @@ class Grid {
       this.selected.reject(); //removes selected class
       this.selected = null;
     } else if (this.selected && this.selected.pos.isNearby(pos)) {
-      // this.rebuild();
       this.selected.reject();
       this.handleSwap(newJewel, this.selected);
       this.selected = null;
@@ -347,9 +345,9 @@ class Grid {
         found = true;
         //setTimeout after animation time
         matches.forEach(match => this.points += 100);
+        this.score.innerHTML = `${this.points}`;
         console.log(this.points);
         this.removeJewels(matches);
-        this.score.innerHTML = `${this.points}`;
       }
     }
     this.rebuild();
@@ -393,12 +391,23 @@ class Grid {
     if (pos.isValid()) return this.rows[pos.x][pos.y];
   }
 
+  removeJewels(jewels) {
+    console.log("removeJewels called");
+    //takes a jewel object array arg
+    //return an array of positions to pass to refillTile
+    jewels.forEach(jewel => {
+      this.rows[jewel.pos.x][jewel.pos.y] = null;
+      this.refillTile(jewel.pos);
+    });
+  }
+
   refillTile(pos) {
     console.log("refillTile ran");
     let shiftDownJewels = [];
     for (let x = pos.x-1; x >= 0; x--) {
       shiftDownJewels.push(this.rows[x][pos.y]);
     } //get all jewels above removed position
+    // shiftDownJewels.forEach(jewel => this.animateJewelDown(jewel));
     shiftDownJewels.forEach(jewel => {
       jewel.pos.x = jewel.pos.x+1; //reset jewel pos property to x+1
       jewel.x = jewel.x+1; //reset jewel x property to x+1
@@ -413,15 +422,20 @@ class Grid {
     this.rebuild();
   }
 
-  removeJewels(jewels) {
-    console.log("removeJewels called");
-    //takes a jewel object array arg
-    //return an array of positions to pass to refillTile
-    jewels.forEach(jewel => {
-      this.rows[jewel.pos.x][jewel.pos.y] = null;
-      this.refillTile(jewel.pos);
-    });
-  }
+  // animateJewelDown(jewel) {
+  //   jewel.animateGoDown();
+  //   let div = jewel.div;
+  //   let pos = 0;
+  //   let id = setInterval(frame, 3000);
+  //   function frame() {
+  //     if (pos === 55) {
+  //       clearInterval(id);
+  //     } else {
+  //       pos++;
+  //       div.style.top = `${pos}` + 'px';
+  //     }
+  //   }
+  // }
 
   clearGrid() {
     setTimeout(() => {
@@ -526,10 +540,7 @@ class Jewel {
 
   animateGoDown(newPos) {
     console.log("animateGoDown ran");
-    this.div.classList.add('goDown');
-    setTimeout(() => {
-      this.div.classList.remove('goDown');
-    }, 2000);
+    this.div.classList.add('goDown');  
   }
 
   placeJewel(delay = 500) {
