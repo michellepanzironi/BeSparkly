@@ -154,7 +154,7 @@ class Game {
     this.board = document.getElementById('board');
     this.board.addEventListener('incrementLevel', this.incrementLevel.bind(this));
     this.board.addEventListener('timeout', this.gameOver.bind(this));
-    this.levels = document.getElementById('level');
+    // this.levels = document.getElementById('level');
     this.level = 1;
     this.grid = new _grid__WEBPACK_IMPORTED_MODULE_0__["default"](this, this.level);
     this.timer = new _timer__WEBPACK_IMPORTED_MODULE_2__["default"]();
@@ -162,7 +162,7 @@ class Game {
     this.play();
   }
   newLevel() {
-    this.levels.innerHTML = `Level ${this.level}`;
+    // this.levels.innerHTML = `Level ${this.level}`;
     this.grid.reset();
     this.timer.reset(200 * 1000 - (20 * this.level));
   }
@@ -182,6 +182,7 @@ class Game {
   gameOver() {
     this.levelOver(3000);
     this.grid.level = 1;
+    this.grid.score = 100;
   }
 
   play() {
@@ -228,6 +229,9 @@ class Grid {
     this.selectJewel = this.selectJewel.bind(this);
     this.newJewelPositions = this.newJewelPositions.bind(this);
     this.select = this.select.bind(this);
+    this.points = 100;
+    this.score = document.getElementById('score');
+    this.scorenumber = `${this.points}`;
   }
 
   reset() {
@@ -341,11 +345,11 @@ class Grid {
         return false;
       } else {
         found = true;
-        console.log(matches);
         //setTimeout after animation time
+        matches.forEach(match => this.points += 100);
+        console.log(this.points);
         this.removeJewels(matches);
-        console.log(this);
-        this.rebuild();
+        this.score.innerHTML = `${this.points}`;
       }
     }
     this.rebuild();
@@ -544,17 +548,6 @@ class Jewel {
         this.div.remove();
       }, 300);
     }, delay);
-  }
-
-  move(newPos, delay) {
-    console.log("move ran");
-    this.pos = newPos;
-    this.div.data = newPos;
-  }
-
-  moveDown(delay) {
-    console.log("moveDown ran");
-    this.move(this.pos.down(), delay);
   }
 }
 
