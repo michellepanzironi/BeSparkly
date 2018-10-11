@@ -226,7 +226,7 @@ class Grid {
     this.reset = this.reset.bind(this);
     this.rebuild = this.rebuild.bind(this);
     this.selectJewel = this.selectJewel.bind(this);
-    this.updateColumns = this.updateColumns.bind(this);
+    this.newJewelPositions = this.newJewelPositions.bind(this);
     this.select = this.select.bind(this);
   }
 
@@ -248,6 +248,7 @@ class Grid {
   }
 
   rebuild() {
+    console.log("rebuild ran");
     this.level = this.game.level;
     this.game.board.innerHTML = '';
     for (let i = 0; i < 8; i++) {
@@ -273,8 +274,8 @@ class Grid {
       this.selected.reject();
       this.selected = null;
     } else if (this.selected && this.selected.pos.isNearby(pos)) {
+      this.selected.reject(); //removes selected class
       this.handleSwap(newJewel, this.selected);
-      this.selected.reject();
       this.selected = null;
     } else {
       this.select(newJewel);
@@ -288,26 +289,42 @@ class Grid {
   }
 
   handleSwap(jewel, otherJewel) {
-    this.switchJewels(jewel, otherJewel, 0);
+    this.switchJewels(jewel, otherJewel);
     if (this.getMatchedJewels()) {
       console.log("found matches");
       this.handleMatches();
+      this.rebuild();
     } else {
-      this.switchJewels(jewel, otherJewel, 300);
+      this.switchJewels(jewel, otherJewel, 300); //switch them back
     }
   }
 
+
   switchJewels(jewel, otherJewel, delay) {
-    jewel.switchWith(otherJewel, delay);
-    this.updateColumns(jewel);
-    this.updateColumns(otherJewel);
+    setTimeout(() => {
+      this.newJewelPositions(jewel, otherJewel); //swaps pos on jewels
+      console.log("newJewelPositions ran");
+      this.newGridPositions(jewel, otherJewel);
+      console.log("newGridPositions ran");
+    }, delay);
   }
 
-  updateColumns(jewel) {
-    this.rows[jewel.pos.y][jewel.pos.x] = jewel;
+  newJewelPositions(jewel, otherJewel) {
+    const jewelAPos = new _position__WEBPACK_IMPORTED_MODULE_0__["default"](jewel.pos.x, jewel.pos.y);
+    const jewelBPos = new _position__WEBPACK_IMPORTED_MODULE_0__["default"](otherJewel.pos.x, otherJewel.pos.y);
+    jewel.pos = jewelBPos;
+    otherJewel.pos = jewelAPos;
+  }
+
+  newGridPositions(jewel, otherJewel) {
+    const jewelAPos = jewel.pos;
+    const jewelBPos = otherJewel.pos;
+    this.rows[jewelAPos.x][jewelAPos.y] = jewel; //swaps pos on grid
+    this.rows[jewelBPos.x][jewelBPos.y] = otherJewel;
   }
 
   handleMatches() {
+    console.log("handleMatches ran");
     let found = true;
     while (found) {
       let matches = this.getMatchedJewels();
@@ -317,6 +334,7 @@ class Grid {
       } else {
         found = true;
         console.log(matches);
+        //setTimeout after animation time
         this.removeJewels(matches);
         console.log(this);
       }
@@ -362,7 +380,6 @@ class Grid {
   }
 
   refillTile(pos) {
-    console.log("refillTile called");
     let shiftDownJewels = [];
     for (let x = pos.x-1; x >= 0; x--) {
       shiftDownJewels.push(this.rows[x][pos.y]);
@@ -404,8 +421,8 @@ class Grid {
             allTiles.forEach(jewel => {
               if (jewel.pos.y === 7) {
                 jewel.remove(0);
-              } else {
-                jewel.moveDown();
+              // } else {
+              //   jewel.moveDown();
               }
             });
             oneDown(i + 1);
@@ -466,8 +483,8 @@ class Jewel {
   animate(newPos, delay) {
     console.log("animate ran");
     setTimeout(() => {
-      this.div.style.left = `${newPos.px().x}px`;
-      this.div.style.top = `${newPos.px().y}px`;
+      this.div.style.left = `${newPos.x}px`;
+      this.div.style.top = `${newPos.y}px`;
     }, delay);
   }
 
@@ -493,7 +510,7 @@ class Jewel {
     console.log("move ran");
     this.pos = newPos;
     this.div.data = newPos;
-    this.animate(newPos, delay);
+    // this.animate(newPos, delay);
   }
 
   moveDown(delay) {
@@ -501,11 +518,11 @@ class Jewel {
     this.move(this.pos.down(), delay);
   }
 
-  switchWith(otherJewel, delay) {
-    console.log("switchWith ran");
-    this.move(otherJewel.pos, delay);
-    otherJewel.move(this.pos, delay);
-  }
+  // switchWith(otherJewel, delay) {
+  //   console.log("switchWith ran");
+  //   this.move(otherJewel.pos, delay);
+  //   otherJewel.move(this.pos, delay);
+  // }
 }
 
 
