@@ -290,6 +290,7 @@ class Grid {
 
   handleSwap(jewel, otherJewel) {
     this.switchJewels(jewel, otherJewel);
+    this.rebuild();
     if (this.getMatchedJewels()) {
       console.log("found matches");
       this.handleMatches();
@@ -306,6 +307,8 @@ class Grid {
       console.log("newJewelPositions ran");
       this.newGridPositions(jewel, otherJewel);
       console.log("newGridPositions ran");
+
+      this.rebuild();
     }, delay);
   }
 
@@ -319,7 +322,7 @@ class Grid {
   newGridPositions(jewel, otherJewel) {
     const jewelAPos = jewel.pos;
     const jewelBPos = otherJewel.pos;
-    this.rows[jewelAPos.x][jewelAPos.y] = jewel; //swaps pos on grid
+    this.rows[jewelAPos.x][jewelAPos.y] = jewel; //swaps pos on grid object
     this.rows[jewelBPos.x][jewelBPos.y] = otherJewel;
   }
 
